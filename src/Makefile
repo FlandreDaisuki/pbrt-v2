@@ -5,10 +5,10 @@
 # common locations for the OpenEXR libraries; may need to be updated
 # for unusual installation locations
 HAVE_EXR=1
-EXR_INCLUDES=-I/usr/local/include/OpenEXR -I/usr/include/OpenEXR -I/opt/local/include/OpenEXR 
+EXR_INCLUDES=-I/usr/local/include/OpenEXR -I/usr/include/OpenEXR -I/opt/local/include/OpenEXR
 EXR_LIBDIR=-L/usr/local/lib -L/opt/local/lib
 
-HAVE_LIBTIFF=0
+HAVE_LIBTIFF=1
 TIFF_INCLUDES=-I/usr/local/include -I/opt/local/include
 TIFF_LIBDIR=-L/usr/local/lib -L/opt/local/lib
 
@@ -24,9 +24,9 @@ DEFS=-DPBRT_HAS_OPENEXR
 MARCH=-m64
 
 # change this to -g3 for debug builds
-OPT=-O2
+OPT=-g3
 # comment out this line to enable assertions at runtime
-DEFS += -DNDEBUG
+# DEFS += -DNDEBUG
 
 #########################################################################
 # nothing below this line should need to be changed (usually)
@@ -59,15 +59,15 @@ ifeq ($(ARCH),Darwin)
   EXRLIBS += -lz
 endif
 
-CC=gcc
-CXX=g++
+CC=clang
+CXX=clang++
 LD=$(CXX) $(OPT) $(MARCH)
 INCLUDE=-I. -Icore $(EXR_INCLUDES) $(TIFF_INCLUDES)
 WARN=-Wall
 CWD=$(shell pwd)
 CXXFLAGS=$(OPT) $(MARCH) $(INCLUDE) $(WARN) $(DEFS)
 CCFLAGS=$(CXXFLAGS)
-LIBS=$(LEXLIB) $(EXR_LIBDIR) $(EXRLIBS) -lm 
+LIBS=$(LEXLIB) $(EXR_LIBDIR) $(EXRLIBS) -lm
 
 LIB_CSRCS=core/targa.c
 LIB_CXXSRCS  = $(wildcard core/*.cpp) core/pbrtlex.cpp core/pbrtparse.cpp
@@ -96,7 +96,7 @@ dirs:
 
 $(LIBOBJS): $(HEADERS)
 
-.PHONY: dirs tools 
+.PHONY: dirs tools
 .SECONDARY:
 
 objs/libpbrt.a: $(LIBOBJS)
@@ -175,13 +175,13 @@ bin/pbrt: objs/main_pbrt.o objs/libpbrt.a
 	@echo "Linking $@"
 	@$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-bin/%: objs/tools_%.o objs/libpbrt.a 
+bin/%: objs/tools_%.o objs/libpbrt.a
 	@echo "Linking $@"
 	@$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-bin/exrtotiff: objs/tools_exrtotiff.o 
+bin/exrtotiff: objs/tools_exrtotiff.o
 	@echo "Linking $@"
-	@$(CXX) $(CXXFLAGS) -o $@ $^ $(TIFF_LIBDIR) -ltiff $(LIBS) 
+	@$(CXX) $(CXXFLAGS) -o $@ $^ $(TIFF_LIBDIR) -ltiff $(LIBS)
 
 core/pbrtlex.cpp: core/pbrtlex.ll core/pbrtparse.cpp
 	@echo "Lex'ing pbrtlex.ll"
